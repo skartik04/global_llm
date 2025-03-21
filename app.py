@@ -1,9 +1,11 @@
 import streamlit as st
 import json
-import os
 import pandas as pd
 import ast
+import re
+
 st.set_page_config(layout="wide")
+
 # ---------- Load the JSON data ----------
 @st.cache_data
 def load_data():
@@ -18,6 +20,8 @@ if "req_index" not in st.session_state:
     st.session_state.req_index = 0
 if "selected_section" not in st.session_state:
     st.session_state.selected_section = None
+if "evals" not in st.session_state:
+    st.session_state.evals = []
 
 # ---------- UI Header ----------
 st.title("LLM Structured Output Evaluation")
@@ -52,14 +56,11 @@ structured_output = {k: v for k, v in entry.items() if k not in ["raw_input", "r
 st.markdown("#### Raw Input")
 
 def render_raw_input(raw_input):
-    import re
     try:
-        # Case 1: it's already a dictionary
         if isinstance(raw_input, dict):
             st.json(raw_input)
             return
 
-        # Case 2: string that contains a dictionary (e.g., starts with "Prescription: {")
         if isinstance(raw_input, str):
             match = re.search(r"\{.*\}", raw_input, re.DOTALL)
             if match:
@@ -71,7 +72,7 @@ def render_raw_input(raw_input):
     except Exception as e:
         st.warning(f"Could not parse raw_input as a dictionary: {e}")
 
-    # Fallback: render as plain text in a dark box
+    # Fallback: render as plain text
     st.markdown(
         f"""<div style="background-color:#262730;padding:15px;border-radius:6px;color:white;white-space:pre-wrap;">{raw_input}</div>""",
         unsafe_allow_html=True
@@ -103,20 +104,17 @@ if st.button("Save Evaluation"):
         "comment": comment
     }
 
-    eval_df = pd.DataFrame([eval_entry])
-    if os.path.exists("evaluations.csv"):
-        eval_df.to_csv("evaluations.csv", mode="a", index=False, header=False)
-    else:
-        eval_df.to_csv("evaluations.csv", index=False)
+    st.session_state.evals.append(eval_entry)
+    st.success(f"✅ Saved evaluation for `{req_id}` → `{selected_section}`")
 
-        st.success(f"Saved evaluation for `{req_id}` → `{selected_section}`")
+# ---------- Download CSV ----------
+if st.session_state.evals:
+    eval_df = pd.DataFrame(st.session_state.evals)
+    csv = eval_df.to_csv(index=False).encode("utf-8")
 
-    # --- Add CSV download button ---
-    if os.path.exists("evaluations.csv"):
-        with open("evaluations.csv", "rb") as f:
-            st.download_button(
-                label="Download Your Evaluation",
-                data=f,
-                file_name="evaluations.csv",
-                mime="text/csv"
-            )
+    st.download_button(
+        label="📥 Download Your Evaluation",
+        data=csv,
+        file_name="evaluations.csv",
+        mime="text/csv"
+    )
