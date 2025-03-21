@@ -109,4 +109,14 @@ if st.button("💾 Save Evaluation"):
     else:
         eval_df.to_csv("evaluations.csv", index=False)
 
-    st.success(f"✅ Saved evaluation for `{req_id}` → `{selected_section}`")
+        st.success(f"✅ Saved evaluation for `{req_id}` → `{selected_section}`")
+
+    # --- Add CSV download button ---
+    if os.path.exists("evaluations.csv"):
+        with open("evaluations.csv", "rb") as f:
+            st.download_button(
+                label="📥 Download Your Evaluation",
+                data=f,
+                file_name="evaluations.csv",
+                mime="text/csv"
+            )
