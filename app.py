@@ -92,7 +92,7 @@ st.json(structured_output)
 
 # ---------- Evaluation Form ----------
 st.markdown("#### 📝 Your Evaluation")
-rating = st.radio("How would you rate this output?", ["✅ Correct", "❌ Incorrect", "🤷 Ambiguous"], horizontal=True)
+rating = st.radio("How would you rate this output?", ["Correct", "Incorrect", "Ambiguous"], horizontal=True)
 comment = st.text_area("Comment (optional):")
 
 if st.button("💾 Save Evaluation"):
@@ -109,7 +109,7 @@ if st.button("💾 Save Evaluation"):
     else:
         eval_df.to_csv("evaluations.csv", index=False)
 
-        st.success(f"✅ Saved evaluation for `{req_id}` → `{selected_section}`")
+        st.success(f"Saved evaluation for `{req_id}` → `{selected_section}`")
 
     # --- Add CSV download button ---
     if os.path.exists("evaluations.csv"):
