@@ -7,7 +7,7 @@ st.set_page_config(layout="wide")
 # ---------- Load the JSON data ----------
 @st.cache_data
 def load_data():
-    with open("/home/kartik/global_health_llm/all_features_combined.json") as f:
+    with open("all_features_combined.json") as f:
         return json.load(f)
 
 data = load_data()
