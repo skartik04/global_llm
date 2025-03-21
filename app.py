@@ -29,7 +29,7 @@ with col1:
         st.session_state.req_index -= 1
         st.session_state.selected_section = None
 with col3:
-    if st.button("Next ➡️") and st.session_state.req_index < len(request_ids) - 1:
+    if st.button("Next") and st.session_state.req_index < len(request_ids) - 1:
         st.session_state.req_index += 1
         st.session_state.selected_section = None
 
@@ -69,7 +69,7 @@ def render_raw_input(raw_input):
                     st.json(parsed)
                     return
     except Exception as e:
-        st.warning(f"⚠️ Could not parse raw_input as a dictionary: {e}")
+        st.warning(f"Could not parse raw_input as a dictionary: {e}")
 
     # Fallback: render as plain text in a dark box
     st.markdown(
