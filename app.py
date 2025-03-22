@@ -44,6 +44,21 @@ if "user_id" not in st.session_state or st.session_state.get("user_id") != user_
     st.session_state.user_id = user_id
     st.session_state.evals = load_user_evals(user_id)
 
+    # 🔁 Set req_index to last evaluated request if possible
+    if st.session_state.evals:
+        last_eval = st.session_state.evals[-1]
+        last_req_id = last_eval.get("request_id")
+        last_section = last_eval.get("section")
+
+        if last_req_id in request_ids:
+            st.session_state.req_index = request_ids.index(last_req_id)
+        else:
+            st.session_state.req_index = 0
+
+        st.session_state.selected_section = last_section
+    else:
+        st.session_state.req_index = 0
+        st.session_state.selected_section = None
 
 
 # ---------- Session State ----------
