@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import ast
 import re
+import os
 
 st.set_page_config(layout="wide")
 
@@ -15,13 +16,24 @@ def load_data():
 data = load_data()
 request_ids = list(data.keys())
 
+# ---------- User Login ----------
+st.sidebar.title("User Identification")
+user_id = st.sidebar.text_input("Enter your name or initials", value="user1")
+
+user_filename = f"evaluations_{user_id}.csv"
+
+# ---------- Load existing evaluations ----------
+if "evals" not in st.session_state:
+    if user_id and os.path.exists(user_filename):
+        st.session_state.evals = pd.read_csv(user_filename).to_dict("records")
+    else:
+        st.session_state.evals = []
+
 # ---------- Session State ----------
 if "req_index" not in st.session_state:
     st.session_state.req_index = 0
 if "selected_section" not in st.session_state:
     st.session_state.selected_section = None
-if "evals" not in st.session_state:
-    st.session_state.evals = []
 
 # ---------- UI Header ----------
 st.title("LLM Structured Output Evaluation")
@@ -44,7 +56,11 @@ st.markdown(f"### Request: `{req_id}`")
 sections = list(data[req_id].keys())
 
 # ---------- Select Structured Output ----------
-selected_section = st.radio("Choose output to evaluate:", sections, index=0 if st.session_state.selected_section is None else sections.index(st.session_state.selected_section))
+selected_section = st.radio(
+    "Choose output to evaluate:",
+    sections,
+    index=0 if st.session_state.selected_section is None else sections.index(st.session_state.selected_section)
+)
 st.session_state.selected_section = selected_section
 
 entry = data[req_id][selected_section]
@@ -60,7 +76,6 @@ def render_raw_input(raw_input):
         if isinstance(raw_input, dict):
             st.json(raw_input)
             return
-
         if isinstance(raw_input, str):
             match = re.search(r"\{.*\}", raw_input, re.DOTALL)
             if match:
@@ -71,7 +86,7 @@ def render_raw_input(raw_input):
                     return
     except Exception as e:
         st.warning(f"Could not parse raw_input as a dictionary: {e}")
-
+    
     # Fallback: render as plain text
     st.markdown(
         f"""<div style="background-color:#262730;padding:15px;border-radius:6px;color:white;white-space:pre-wrap;">{raw_input}</div>""",
@@ -105,7 +120,11 @@ if st.button("Save Evaluation"):
     }
 
     st.session_state.evals.append(eval_entry)
-    st.success(f"✅ Saved evaluation for `{req_id}` → `{selected_section}`")
+
+    # Save to user-specific CSV
+    pd.DataFrame(st.session_state.evals).to_csv(user_filename, index=False)
+
+    st.success(f"Saved evaluation for `{req_id}` → `{selected_section}`")
 
 # ---------- Download CSV ----------
 if st.session_state.evals:
@@ -115,6 +134,6 @@ if st.session_state.evals:
     st.download_button(
         label="📥 Download Your Evaluation",
         data=csv,
-        file_name="evaluations.csv",
+        file_name=user_filename,
         mime="text/csv"
     )
