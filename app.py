@@ -160,12 +160,23 @@ if st.button("Save Evaluation"):
         "comment": comment
     }
 
-    st.session_state.evals.append(eval_entry)
+    # Overwrite if it already exists
+    existing_idx = next(
+        (i for i, entry in enumerate(st.session_state.evals)
+         if entry["request_id"] == req_id and entry["section"] == selected_section),
+        None
+    )
 
-    # Save to user-specific CSV
+    if existing_idx is not None:
+        st.session_state.evals[existing_idx] = eval_entry
+    else:
+        st.session_state.evals.append(eval_entry)
+
+    # Save to user-specific CSVs
     pd.DataFrame(st.session_state.evals).to_csv(user_filename, index=False)
 
     st.success(f"Saved evaluation for `{req_id}` → `{selected_section}`")
+
 
 # ---------- Download CSV ----------
 if st.session_state.evals:
