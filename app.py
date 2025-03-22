@@ -26,6 +26,13 @@ if not user_id:
 
 user_filename = f"evaluations_{user_id}.csv"
 
+if st.sidebar.button("🔄 Start Fresh CSV"):
+    st.session_state.evals = []
+    if os.path.exists(user_filename):
+        os.remove(user_filename)
+    pd.DataFrame(columns=["request_id", "section", "rating", "comment"]).to_csv(user_filename, index=False)
+    st.success("Started a fresh evaluation CSV.")
+
 
 def load_user_evals(user_id):
     filename = f"evaluations_{user_id}.csv"
