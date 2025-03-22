@@ -26,7 +26,7 @@ if not user_id:
 
 user_filename = f"evaluations_{user_id}.csv"
 
-if st.sidebar.button("🔄 Start Fresh CSV"):
+if st.sidebar.button("Start Fresh CSV"):
     st.session_state.evals = []
     if os.path.exists(user_filename):
         os.remove(user_filename)
