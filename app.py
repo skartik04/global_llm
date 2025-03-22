@@ -27,11 +27,20 @@ if not user_id:
 user_filename = f"evaluations_{user_id}.csv"
 
 if st.sidebar.button("Start Fresh CSV"):
+    # Clear in-memory evaluations and reset navigation
     st.session_state.evals = []
+    st.session_state.req_index = 0
+    st.session_state.selected_section = None
+
+    # Delete old CSV if exists
     if os.path.exists(user_filename):
         os.remove(user_filename)
+
+    # Create empty CSV with headers
     pd.DataFrame(columns=["request_id", "section", "rating", "comment"]).to_csv(user_filename, index=False)
-    st.success("Started a fresh evaluation CSV.")
+
+    st.success("Started a fresh evaluation CSV. Beginning from the first request.")
+
 
 
 def load_user_evals(user_id):
@@ -44,7 +53,7 @@ if "user_id" not in st.session_state or st.session_state.get("user_id") != user_
     st.session_state.user_id = user_id
     st.session_state.evals = load_user_evals(user_id)
 
-    # 🔁 Set req_index to last evaluated request if possible
+    # Set req_index to last evaluated request if possible
     if st.session_state.evals:
         last_eval = st.session_state.evals[-1]
         last_req_id = last_eval.get("request_id")
