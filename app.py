@@ -26,12 +26,18 @@ if not user_id:
 
 user_filename = f"evaluations_{user_id}.csv"
 
+# ---------- Cached Evaluations Loader ----------
+@st.cache_data(persist=True)
+def load_user_evals(user_id):
+    filename = f"evaluations_{user_id}.csv"
+    if os.path.exists(filename):
+        return pd.read_csv(filename).to_dict("records")
+    return []
+
 # ---------- Load existing evaluations ----------
 if "evals" not in st.session_state:
-    if user_id and os.path.exists(user_filename):
-        st.session_state.evals = pd.read_csv(user_filename).to_dict("records")
-    else:
-        st.session_state.evals = []
+    st.session_state.evals = load_user_evals(user_id)
+
 
 # ---------- Session State ----------
 if "req_index" not in st.session_state:
