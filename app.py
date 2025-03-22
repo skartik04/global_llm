@@ -20,6 +20,10 @@ request_ids = list(data.keys())
 st.sidebar.title("User Identification")
 user_id = st.sidebar.text_input("Enter your name or initials", value="user1")
 
+if not user_id:
+    st.warning("Please enter your name or initials to proceed.")
+    st.stop()
+
 user_filename = f"evaluations_{user_id}.csv"
 
 # ---------- Load existing evaluations ----------
